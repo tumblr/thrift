@@ -22,6 +22,7 @@ package thrift
 import (
 	"log"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
