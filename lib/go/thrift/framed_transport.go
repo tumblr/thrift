@@ -146,7 +146,7 @@ func (p *TFramedTransport) Flush(ctx context.Context) error {
 		return NewTTransportExceptionFromError(err)
 	}
 	if size > 0 {
-		if n, err := p.buf.WriteTo(p.transport); err != nil {
+		if _, err := p.buf.WriteTo(p.transport); err != nil {
 			p.buf.Truncate(0)
 			return NewTTransportExceptionFromError(err)
 		}
