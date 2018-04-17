@@ -141,6 +141,7 @@ func (p *TSimpleServer) innerAccept() (int32, error) {
 		go func() {
 			defer p.wg.Done()
 			if err := p.processRequests(client); err != nil {
+				// HACK(gabe@tumblr)
 				// suppress errors related to being unable to write FIN to pipe due to aggressive
 				// shutdown of pipe.
 				// 2018/04/17 13:15:03 error processing request: write tcp 127.0.0.1:9998->127.0.0.1:44736: write: broken pipe
