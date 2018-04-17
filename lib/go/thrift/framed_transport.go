@@ -147,7 +147,6 @@ func (p *TFramedTransport) Flush(ctx context.Context) error {
 	}
 	if size > 0 {
 		if n, err := p.buf.WriteTo(p.transport); err != nil {
-			print("Error while flushing write buffer of size ", size, " to transport, only wrote ", n, " bytes: ", err.Error(), "\n")
 			p.buf.Truncate(0)
 			return NewTTransportExceptionFromError(err)
 		}
