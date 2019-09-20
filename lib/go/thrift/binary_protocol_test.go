@@ -20,9 +20,43 @@
 package thrift
 
 import (
+	"bytes"
 	"testing"
 )
 
+var testStringDataSet *bytes.Buffer
+
+func generateTestDataSet() {
+}
+
 func TestReadWriteBinaryProtocol(t *testing.T) {
 	ReadWriteProtocolTest(t, NewTBinaryProtocolFactoryDefault())
+}
+
+func BenchmarkReadStringFrom(b *testing.B) {
+	tbp := &TBinaryProtocol{}
+
+	testStringDataSet = &bytes.Buffer{}
+	for i := 0; i < 1024; i++ {
+		testStringDataSet.WriteString("wat")
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tbp.readStringFrom(testStringDataSet, int32(1024*3))
+	}
+}
+
+func BenchmarkReadStringFromOptimized(b *testing.B) {
+	tbp := &TBinaryProtocol{}
+
+	testStringDataSet = &bytes.Buffer{}
+	for i := 0; i < 1024; i++ {
+		testStringDataSet.WriteString("wat")
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tbp.readStringFromOptimized(testStringDataSet, int32(1024*3))
+	}
 }

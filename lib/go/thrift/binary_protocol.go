@@ -27,6 +27,8 @@ import (
 	"fmt"
 	"io"
 	"math"
+
+	"github.com/valyala/bytebufferpool"
 )
 
 type TBinaryProtocol struct {
@@ -485,6 +487,12 @@ func (p *TBinaryProtocol) readStringBody(size int32) (value string, err error) {
 		return "", invalidDataLength
 	}
 
+	s, e := p.readStringFrom(p.trans, size)
+
+	return s, NewTProtocolException(e)
+}
+
+func (p *TBinaryProtocol) readStringFrom(from io.Reader, size int32) (string, error) {
 	var (
 		buf bytes.Buffer
 		e   error
@@ -501,7 +509,7 @@ func (p *TBinaryProtocol) readStringBody(size int32) (value string, err error) {
 	}
 
 	for size > 0 {
-		_, e = io.ReadFull(p.trans, b)
+		_, e = io.ReadFull(from, b)
 		buf.Write(b)
 		if e != nil {
 			break
@@ -511,5 +519,18 @@ func (p *TBinaryProtocol) readStringBody(size int32) (value string, err error) {
 			b = b[:size]
 		}
 	}
-	return buf.String(), NewTProtocolException(e)
+
+	return buf.String(), e
+}
+
+func (p *TBinaryProtocol) readStringFromOptimized(from io.Reader, size int32) (string, error) {
+	buf := bytebufferpool.Get()
+	defer bytebufferpool.Put(buf)
+
+	_, err := io.CopyN(buf, from, int64(size))
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
 }
