@@ -28,6 +28,11 @@ import (
 	"sync/atomic"
 )
 
+var (
+	DefaultResponseHandlers    = 128
+	DefaultResponseBufferDepth = 1024
+)
+
 /*
  * This is not a typical TSimpleServer as it is not blocked after accept a socket.
  * It is more like a TThreadedServer that can handle different connections in different goroutines.
@@ -95,7 +100,7 @@ func NewTSimpleServerFactory6(processorFactory TProcessorFactory, serverTranspor
 
 	ctx, cncl := context.WithCancel(context.Background())
 	toReturn := &TSimpleServer{
-		clientChan:             make(chan TTransport, 1024),
+		clientChan:             make(chan TTransport, DefaultResponseBufferDepth),
 		ctx:                    ctx,
 		cancelFunc:             cncl,
 		processorFactory:       processorFactory,
@@ -105,7 +110,7 @@ func NewTSimpleServerFactory6(processorFactory TProcessorFactory, serverTranspor
 		inputProtocolFactory:   inputProtocolFactory,
 		outputProtocolFactory:  outputProtocolFactory,
 	}
-	for i := 0; i < 128; i++ {
+	for i := 0; i < DefaultResponseHandlers; i++ {
 		toReturn.wg.Add(1)
 		go func() {
 			for {
